@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Booking System</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
+        
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 400px;
+        }
+        .login-box h1 { color: #333; margin-bottom: 8px; font-size: 28px; }
+        .login-box .subtitle { color: #666; margin-bottom: 24px; font-size: 14px; }
+        .login-box label { display: block; margin-bottom: 8px; color: #555; font-weight: 500; }
+        .login-box input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+        .login-box input:focus { outline: none; border-color: #667eea; }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn:hover { background: #5568d3; transform: translateY(-1px); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: #6c757d; }
+        .btn-secondary:hover { background: #5a6268; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-sm { padding: 8px 16px; font-size: 13px; width: auto; }
+        
+        .error-msg {
+            background: #fee;
+            color: #c33;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        .warning-msg {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+        }
+        
+        .hidden { display: none !important; }
+        
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .student-info h2 { color: #333; font-size: 22px; }
+        .student-info p { color: #666; font-size: 14px; margin-top: 4px; }
+        .index-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        .index-badge .label { font-size: 12px; opacity: 0.9; }
+        .index-badge .value { font-size: 28px; font-weight: bold; }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .card h3 {
+            color: #333;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+            font-size: 18px;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 5px;
+            transition: width 0.3s;
+        }
+        
+        .exam-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        .exam-item:hover { border-color: #667eea; }
+        .exam-info h4 { color: #333; margin-bottom: 6px; }
+        .exam-info p { color: #666; font-size: 13px; }
+        .exam-meta {
+            display: flex;
+            gap: 16px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #888;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .badge-open { background: #d4edda; color: #155724; }
+        .badge-booked { background: #cce5ff; color: #004085; }
+        .badge-full { background: #f8d7da; color: #721c24; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; }
+        th { color: #666; font-weight: 600; font-size: 12px; text-transform: uppercase; background: #f8f9fa; }
+        .status-active { color: #28a745; font-weight: 600; }
+        .status-cancelled { color: #dc3545; font-weight: 600; }
+        
+        .admin-header {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .stat-card .number { font-size: 32px; font-weight: bold; color: #667eea; }
+        .stat-card .label { color: #666; font-size: 13px; margin-top: 4px; }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #555;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.3);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            color: white;
+        }
+        .tab.active { background: white; color: #667eea; }
+        
+        .exam-admin-item {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+        }
+        .exam-admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        .booking-list {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+        .booking-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        .booking-item:last-child { border-bottom: none; }
+        
+        .index-input {
+            width: 70px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .file-upload {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .file-upload:hover { border-color: #667eea; background: #f8f9ff; }
+        
+        @media (max-width: 600px) {
+            .header, .admin-header { flex-direction: column; gap: 16px; }
+            .exam-item { flex-direction: column; gap: 12px; align-items: flex-start; }
+            .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Student Login Screen -->
+<div id="loginScreen" class="login-screen">
+    <div class="login-box">
+        <h1>📚 Exam Booking</h1>
+        <p class="subtitle">Enter your Student ID to continue</p>
+        <div id="loginError"></div>
+        <form onsubmit="return studentLogin()">
+            <label for="studentId">Student ID</label>
+            <input type="text" id="studentId" placeholder="e.g., STU001" required autofocus>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="#" onclick="showAdminLogin()" style="color: #667eea; font-size: 13px; text-decoration: none;">👨‍🏫 Teacher Login</a>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Login Screen -->
+<div id="adminLoginScreen" class="login-screen hidden">
+    <div class="login-box">
+        <h1>👨‍🏫 Teacher Login</h1>
+        <p class="subtitle">Manage exams and students</p>
+        <div id="adminLoginError"></div>
+        <form onsubmit="return adminLogin()">
+            <label for="adminPassword">Password</label>
+            <input type="password" id="adminPassword" placeholder="Enter password" required>
+            <button type="submit" class="btn">Login</button>
+        </form>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="#" onclick="showStudentLogin()" style="color: #667eea; font-size: 13px; text-decoration: none;">← Back to Student Login</a>
+        </div>
+    </div>
+</div>
+
+<!-- Student Dashboard -->
+<div id="studentDashboard" class="hidden">
+    <div class="container">
+        <div class="header">
+            <div class="student-info">
+                <h2 id="studentName">Welcome!</h2>
+                <p id="studentIdDisplay">ID: </p>
+            </div>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <div class="index-badge">
+                    <div class="label">Current Index</div>
+                    <div class="value" id="studentIndex">1.0</div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="logout()">Logout</button>
+            </div>
+        </div>
+
+        <div id="studentMessages"></div>
+
+        <!-- Progress -->
+        <div class="card">
+            <h3>📊 Booking Progress</h3>
+            <p style="color: #666; font-size: 14px;">
+                You need <strong>3 bookings</strong> this term. 
+                Current: <strong id="bookingProgress">0/3</strong>
+            </p>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+        </div>
+
+        <!-- Available Exams -->
+        <div class="card">
+            <h3>📅 Available Exams</h3>
+            <div id="availableExams"></div>
+        </div>
+
+        <!-- My Bookings -->
+        <div class="card">
+            <h3>📋 My Bookings</h3>
+            <div id="myBookings"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Admin Dashboard -->
+<div id="adminDashboard" class="hidden">
+    <div class="container">
+        <div class="admin-header">
+            <div>
+                <h2 style="color: #333;">👨‍🏫 Teacher Dashboard</h2>
+                <p style="color: #666; font-size: 14px;">Manage exams, students, and indexes</p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="adminLogout()">Logout</button>
+        </div>
+
+        <div id="adminMessages"></div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="number" id="totalStudents">0</div>
+                <div class="label">Students</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalBookings">0</div>
+                <div class="label">Active Bookings</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="openExams">0</div>
+                <div class="label">Open Exams</div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="showAdminTab('exams')">📅 Exams</button>
+            <button class="tab" onclick="showAdminTab('students')">👥 Students</button>
+        </div>
+
+        <!-- Exams Tab -->
+        <div id="adminExamsTab">
+            <!-- Create Exam -->
+            <div class="card">
+                <h3>Create New Exam</h3>
+                <form onsubmit="return createExam()">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Exam Title</label>
+                            <input type="text" id="examTitle" placeholder="e.g., Week 1 Quiz" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Date</label>
+                            <input type="date" id="examDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Max Seats</label>
+                            <input type="number" id="examSeats" min="1" max="50" value="8" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Index Value (0.5-1.5)</label>
+                            <input type="number" id="examIndex" min="0.5" max="1.5" step="0.1" value="1.0" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Exam</button>
+                </form>
+            </div>
+
+            <!-- Exam List -->
+            <div class="card">
+                <h3>All Exams</h3>
+                <div id="adminExamList"></div>
+            </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="adminStudentsTab" class="hidden">
+            <!-- Add Student -->
+            <div class="card">
+                <h3>Add Student</h3>
+                <form onsubmit="return addStudent()">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Student ID</label>
+                            <input type="text" id="newStudentId" placeholder="e.g., STU026" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="newStudentName" placeholder="e.g., John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email (optional)</label>
+                            <input type="email" id="newStudentEmail" placeholder="student@email.com">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Student</button>
+                </form>
+            </div>
+
+            <!-- Bulk Upload -->
+            <div class="card">
+                <h3>Bulk Upload (CSV)</h3>
+                <p style="color: #666; font-size: 13px; margin-bottom: 12px;">
+                    CSV format: student_id, name, email, index
+                </p>
+                <div class="file-upload" onclick="document.getElementById('csvFile').click()">
+                    <p>📁 Click to upload CSV file</p>
+                    <input type="file" id="csvFile" accept=".csv" style="display: none;" onchange="uploadCSV(this)">
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="downloadTemplate()">Download Template</button>
+                <button class="btn btn-secondary btn-sm" onclick="exportStudents()">Export Students</button>
+                <button class="btn btn-danger btn-sm" onclick="clearAllData()">Clear All Data</button>
+            </div>
+
+            <!-- Student List -->
+            <div class="card">
+                <h3>All Students</h3>
+                <div id="adminStudentList"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// ─── Data Management ─────────────────────────────────────────────────────────
+
+const ADMIN_PASSWORD = 'teacher123'; // Change this!
+
+// Initialize with sample data if empty
+function initializeData() {
+    if (!localStorage.getItem('students')) {
+        const sampleStudents = [
+            { student_id: 'STU001', name: 'Ahmed Hassan', email: 'ahmed@email.com', index: 1.0 },
+            { student_id: 'STU002', name: 'Fatima Ali', email: 'fatima@email.com', index: 1.0 },
+            { student_id: 'STU003', name: 'Mohammed Omar', email: 'mohammed@email.com', index: 1.0 },
+            { student_id: 'STU004', name: 'Aisha Khalid', email: 'aisha@email.com', index: 1.0 },
+            { student_id: 'STU005', name: 'Omar Farouk', email: 'omar@email.com', index: 1.0 },
+            { student_id: 'STU006', name: 'Layla Mahmoud', email: 'layla@email.com', index: 1.0 },
+            { student_id: 'STU007', name: 'Youssef Ibrahim', email: 'youssef@email.com', index: 1.0 },
+            { student_id: 'STU008', name: 'Zainab Mohamed', email: 'zainab@email.com', index: 1.0 },
+            { student_id: 'STU009', name: 'Karim Abdelaziz', email: 'karim@email.com', index: 1.0 },
+            { student_id: 'STU010', name: 'Mariam Said', email: 'mariam@email.com', index: 1.0 },
+            { student_id: 'STU011', name: 'Tarek Hussein', email: 'tarek@email.com', index: 1.0 },
+            { student_id: 'STU012', name: 'Nour El-Din', email: 'nour@email.com', index: 1.0 },
+            { student_id: 'STU013', name: 'Hala Mostafa', email: 'hala@email.com', index: 1.0 },
+            { student_id: 'STU014', name: 'Rami Adel', email: 'rami@email.com', index: 1.0 },
+            { student_id: 'STU015', name: 'Dina Samir', email: 'dina@email.com', index: 1.0 },
+            { student_id: 'STU016', name: 'Khaled Anwar', email: 'khaled@email.com', index: 1.0 },
+            { student_id: 'STU017', name: 'Salma Fathy', email: 'salma@email.com', index: 1.0 },
+            { student_id: 'STU018', name: 'Hassan Gamal', email: 'hassan@email.com', index: 1.0 },
+            { student_id: 'STU019', name: 'Reem Ashraf', email: 'reem@email.com', index: 1.0 },
+            { student_id: 'STU020', name: 'Amr Diab', email: 'amr@email.com', index: 1.0 },
+            { student_id: 'STU021', name: 'Heba Magdy', email: 'heba@email.com', index: 1.0 },
+            { student_id: 'STU022', name: 'Sherif Nabil', email: 'sherif@email.com', index: 1.0 },
+            { student_id: 'STU023', name: 'Mona Ramadan', email: 'mona@email.com', index: 1.0 },
+            { student_id: 'STU024', name: 'Waleed Sherif', email: 'waleed@email.com', index: 1.0 },
+            { student_id: 'STU025', name: 'Eman Adel', email: 'eman@email.com', index: 1.0 }
+        ];
+        localStorage.setItem('students', JSON.stringify(sampleStudents));
+    }
+    if (!localStorage.getItem('exams')) {
+        localStorage.setItem('exams', JSON.stringify([]));
+    }
+    if (!localStorage.getItem('bookings')) {
+        localStorage.setItem('bookings', JSON.stringify([]));
+    }
+}
+
+function getStudents() { return JSON.parse(localStorage.getItem('students') || '[]'); }
+function saveStudents(s) { localStorage.setItem('students', JSON.stringify(s)); }
+function getExams() { return JSON.parse(localStorage.getItem('exams') || '[]'); }
+function saveExams(e) { localStorage.setItem('exams', JSON.stringify(e)); }
+function getBookings() { return JSON.parse(localStorage.getItem('bookings') || '[]'); }
+function saveBookings(b) { localStorage.setItem('bookings', JSON.stringify(b)); }
+
+// ─── Student Functions ───────────────────────────────────────────────────────
+
+let currentStudent = null;
+
+function studentLogin() {
+    const id = document.getElementById('studentId').value.trim();
+    const students = getStudents();
+    const student = students.find(s => s.student_id === id);
+    
+    if (student) {
+        currentStudent = student;
+        showScreen('studentDashboard');
+        loadStudentDashboard();
+        return false;
+    } else {
+        document.getElementById('loginError').innerHTML = '<div class="error-msg">Student ID not found. Please check with your instructor.</div>';
+        return false;
+    }
+}
+
+function loadStudentDashboard() {
+    document.getElementById('studentName').textContent = `Welcome, ${currentStudent.name}! 👋`;
+    document.getElementById('studentIdDisplay').textContent = `ID: ${currentStudent.student_id}`;
+    document.getElementById('studentIndex').textContent = currentStudent.index.toFixed(1);
+    
+    const bookings = getBookings().filter(b => b.student_id === currentStudent.student_id);
+    const activeBookings = bookings.filter(b => b.status === 'active');
+    
+    // Progress
+    document.getElementById('bookingProgress').textContent = `${activeBookings.length}/3`;
+    document.getElementById('progressFill').style.width = `${Math.min(activeBookings.length / 3 * 100, 100)}%`;
+    
+    // Check if booked this month
+    const currentMonth = new Date().toISOString().slice(0, 7);
+    const bookedThisMonth = activeBookings.some(b => b.booked_at.startsWith(currentMonth));
+    
+    // Available exams
+    const exams = getExams();
+    const availableHtml = exams.filter(e => e.status === 'open').map(exam => {
+        const examBookings = getBookings().filter(b => b.exam_id === exam.exam_id && b.status === 'active');
+        const remaining = exam.max_seats - examBookings.length;
+        const alreadyBooked = activeBookings.some(b => b.exam_id === exam.exam_id);
+        
+        let buttonHtml = '';
+        if (alreadyBooked) {
+            buttonHtml = '<span class="badge badge-booked">✓ Booked</span>';
+        } else if (remaining <= 0) {
+            buttonHtml = '<span class="badge badge-full">Full</span>';
+        } else if (bookedThisMonth) {
+            buttonHtml = '<button class="btn btn-sm" disabled style="background: #ccc;">Book Now</button>';
+        } else {
+            buttonHtml = `<button class="btn btn-primary btn-sm" onclick="bookExam('${exam.exam_id}')">Book Now</button>`;
+        }
+        
+        return `
+            <div class="exam-item">
+                <div class="exam-info">
+                    <h4>${exam.title}</h4>
+                    <p>Date: ${exam.date}</p>
+                    <div class="exam-meta">
+                        <span>🪑 ${remaining} seats left</span>
+                        <span>📈 Index: +${exam.index_value}</span>
+                    </div>
+                </div>
+                <div>${buttonHtml}</div>
+            </div>
+        `;
+    }).join('') || '<p style="color: #999; text-align: center; padding: 20px;">No exams available</p>';
+    
+    document.getElementById('availableExams').innerHTML = availableHtml;
+    
+    // My bookings
+    const bookingsHtml = bookings.length > 0 ? `
+        <table>
+            <thead>
+                <tr><th>Exam</th><th>Date</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                ${bookings.map(b => {
+                    const exam = exams.find(e => e.exam_id === b.exam_id);
+                    return `
+                        <tr>
+                            <td>${exam ? exam.title : b.exam_id}</td>
+                            <td>${new Date(b.booked_at).toLocaleDateString()}</td>
+                            <td><span class="status-${b.status}">${b.status}</span></td>
+                            <td>${b.status === 'active' ? `<button class="btn btn-danger btn-sm" onclick="cancelBooking('${b.booking_id}')">Cancel</button>` : ''}</td>
+                        </tr>
+                    `;
+                }).join('')}
+            </tbody>
+        </table>
+    ` : '<p style="color: #999; text-align: center; padding: 20px;">No bookings yet</p>';
+    
+    document.getElementById('myBookings').innerHTML = bookingsHtml;
+    
+    // Warning if booked this month
+    if (bookedThisMonth) {
+        document.getElementById('studentMessages').innerHTML = '<div class="warning-msg">⚠️ You already booked an exam this month. Contact instructor for override.</div>';
+    } else {
+        document.getElementById('studentMessages').innerHTML = '';
+    }
+}
+
+function bookExam(examId) {
+    const exams = getExams();
+    const exam = exams.find(e => e.exam_id === examId);
+    const bookings = getBookings();
+    
+    // Check seat availability
+    const examBookings = bookings.filter(b => b.exam_id === examId && b.status === 'active');
+    if (examBookings.length >= exam.max_seats) {
+        alert('Sorry, this exam is full.');
+        return;
+    }
+    
+    // Create booking
+    const booking = {
+        booking_id: `${currentStudent.student_id}_${examId}_${Date.now()}`,
+        student_id: currentStudent.student_id,
+        exam_id: examId,
+        booked_at: new Date().toISOString(),
+        status: 'active'
+    };
+    
+    bookings.push(booking);
+    saveBookings(bookings);
+    
+    document.getElementById('studentMessages').innerHTML = `<div class="success-msg">✅ Successfully booked ${exam.title}!</div>`;
+    loadStudentDashboard();
+}
+
+function cancelBooking(bookingId) {
+    if (!confirm('Cancel this booking?')) return;
+    
+    const bookings = getBookings();
+    const booking = bookings.find(b => b.booking_id === bookingId);
+    if (booking) {
+        booking.status = 'cancelled';
+        saveBookings(bookings);
+        loadStudentDashboard();
+    }
+}
+
+function logout() {
+    currentStudent = null;
+    showScreen('loginScreen');
+    document.getElementById('studentId').value = '';
+    document.getElementById('loginError').innerHTML = '';
+}
+
+// ─── Admin Functions ─────────────────────────────────────────────────────────
+
+function showAdminLogin() {
+    showScreen('adminLoginScreen');
+}
+
+function showStudentLogin() {
+    showScreen('loginScreen');
+}
+
+function adminLogin() {
+    const password = document.getElementById('adminPassword').value;
+    if (password === ADMIN_PASSWORD) {
+        showScreen('adminDashboard');
+        loadAdminDashboard();
+        return false;
+    } else {
+        document.getElementById('adminLoginError').innerHTML = '<div class="error-msg">Incorrect password.</div>';
+        return false;
+    }
+}
+
+function adminLogout() {
+    showScreen('loginScreen');
+    document.getElementById('adminPassword').value = '';
+    document.getElementById('adminLoginError').innerHTML = '';
+}
+
+function loadAdminDashboard() {
+    const students = getStudents();
+    const exams = getExams();
+    const bookings = getBookings().filter(b => b.status === 'active');
+    
+    document.getElementById('totalStudents').textContent = students.length;
+    document.getElementById('totalBookings').textContent = bookings.length;
+    document.getElementById('openExams').textContent = exams.filter(e => e.status === 'open').length;
+    
+    loadAdminExams();
+    loadAdminStudents();
+}
+
+function loadAdminExams() {
+    const exams = getExams();
+    const allBookings = getBookings();
+    
+    const html = exams.map(exam => {
+        const examBookings = allBookings.filter(b => b.exam_id === exam.exam_id && b.status === 'active');
+        const remaining = exam.max_seats - examBookings.length;
+        
+        return `
+            <div class="exam-admin-item">
+                <div class="exam-admin-header">
+                    <div>
+                        <strong>${exam.title}</strong>
+                        <div style="color: #666; font-size: 13px; margin-top: 4px;">
+                            📅 ${exam.date} | 🪑 ${examBookings.length}/${exam.max_seats} booked | 📈 Index: ${exam.index_value}
+                        </div>
+                    </div>
+                    <div>
+                        ${exam.status === 'open' 
+                            ? `<span class="badge badge-open">Open</span> 
+                               ${remaining === 0 ? '<span class="badge badge-full">Full</span>' : ''}
+                               <button class="btn btn-danger btn-sm" onclick="closeExam('${exam.exam_id}')">Close</button>`
+                            : '<span class="badge" style="background: #e2e3e5; color: #383d41;">Closed</span>'
+                        }
+                    </div>
+                </div>
+                ${examBookings.length > 0 ? `
+                    <div class="booking-list">
+                        <strong style="font-size: 12px; color: #666;">Booked Students:</strong>
+                        ${examBookings.map(b => {
+                            const student = getStudents().find(s => s.student_id === b.student_id);
+                            return `<div class="booking-item"><span>${student ? student.name : b.student_id}</span><span style="color: #999;">${new Date(b.booked_at).toLocaleDateString()}</span></div>`;
+                        }).join('')}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('') || '<p style="color: #999; text-align: center; padding: 20px;">No exams created yet</p>';
+    
+    document.getElementById('adminExamList').innerHTML = html;
+}
+
+function loadAdminStudents() {
+    const students = getStudents();
+    
+    const html = students.length > 0 ? `
+        <table>
+            <thead>
+                <tr><th>ID</th><th>Name</th><th>Email</th><th>Index</th><th>Update</th><th>Action</th></tr>
+            </thead>
+            <tbody>
+                ${students.map(s => `
+                    <tr>
+                        <td>${s.student_id}</td>
+                        <td>${s.name}</td>
+                        <td>${s.email || '-'}</td>
+                        <td><strong>${s.index.toFixed(1)}</strong></td>
+                        <td>
+                            <input type="number" class="index-input" id="index_${s.student_id}" min="0.5" max="1.5" step="0.1" value="${s.index}">
+                            <button class="btn btn-success btn-sm" onclick="updateIndex('${s.student_id}')">Update</button>
+                        </td>
+                        <td><button class="btn btn-danger btn-sm" onclick="deleteStudent('${s.student_id}')">Delete</button></td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    ` : '<p style="color: #999; text-align: center; padding: 20px;">No students added yet</p>';
+    
+    document.getElementById('adminStudentList').innerHTML = html;
+}
+
+function createExam() {
+    const title = document.getElementById('examTitle').value;
+    const date = document.getElementById('examDate').value;
+    const maxSeats = parseInt(document.getElementById('examSeats').value);
+    const indexValue = parseFloat(document.getElementById('examIndex').value);
+    
+    const exams = getExams();
+    const exam = {
+        exam_id: 'EXAM_' + Date.now(),
+        title: title,
+        date: date,
+        max_seats: maxSeats,
+        status: 'open',
+        index_value: indexValue,
+        created_at: new Date().toISOString()
+    };
+    
+    exams.push(exam);
+    saveExams(exams);
+    
+    document.getElementById('adminMessages').innerHTML = '<div class="success-msg">✅ Exam created successfully!</div>';
+    setTimeout(() => document.getElementById('adminMessages').innerHTML = '', 3000);
+    
+    document.getElementById('examTitle').value = '';
+    document.getElementById('examDate').value = '';
+    
+    loadAdminDashboard();
+    return false;
+}
+
+function closeExam(examId) {
+    if (!confirm('Close this exam for booking?')) return;
+    
+    const exams = getExams();
+    const exam = exams.find(e => e.exam_id === examId);
+    if (exam) {
+        exam.status = 'closed';
+        saveExams(exams);
+        loadAdminDashboard();
+    }
+}
+
+function addStudent() {
+    const id = document.getElementById('newStudentId').value.trim();
+    const name = document.getElementById('newStudentName').value.trim();
+    const email = document.getElementById('newStudentEmail').value.trim();
+    
+    const students = getStudents();
+    
+    if (students.find(s => s.student_id === id)) {
+        alert('Student ID already exists!');
+        return false;
+    }
+    
+    students.push({ student_id: id, name: name, email: email, index: 1.0 });
+    saveStudents(students);
+    
+    document.getElementById('newStudentId').value = '';
+    document.getElementById('newStudentName').value = '';
+    document.getElementById('newStudentEmail').value = '';
+    
+    loadAdminDashboard();
+    return false;
+}
+
+function updateIndex(studentId) {
+    const newIndex = parseFloat(document.getElementById(`index_${studentId}`).value);
+    
+    if (newIndex < 0.5 || newIndex > 1.5) {
+        alert('Index must be between 0.5 and 1.5');
+        return;
+    }
+    
+    const students = getStudents();
+    const student = students.find(s => s.student_id === studentId);
+    if (student) {
+        student.index = newIndex;
+        saveStudents(students);
+        loadAdminDashboard();
+    }
+}
+
+function deleteStudent(studentId) {
+    if (!confirm(`Delete student ${studentId}? This will cancel all their bookings.`)) return;
+    
+    let students = getStudents();
+    students = students.filter(s => s.student_id !== studentId);
+    saveStudents(students);
+    
+    // Cancel their bookings
+    let bookings = getBookings();
+    bookings = bookings.map(b => b.student_id === studentId ? { ...b, status: 'cancelled' } : b);
+    saveBookings(bookings);
+    
+    loadAdminDashboard();
+}
+
+function uploadCSV(input) {
+    const file = input.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split('\n').filter(line => line.trim());
+        const students = getStudents();
+        
+        let count = 0;
+        for (let i = 1; i < lines.length; i++) { // Skip header
+            const cols = lines[i].split(',').map(c => c.trim());
+            if (cols.length >= 2 && cols[0] && cols[1]) {
+                if (!students.find(s => s.student_id === cols[0])) {
+                    students.push({
+                        student_id: cols[0],
+                        name: cols[1],
+                        email: cols[2] || '',
+                        index: parseFloat(cols[3]) || 1.0
+                    });
+                    count++;
+                }
+            }
+        }
+        
+        saveStudents(students);
+        alert(`Added ${count} students`);
+        loadAdminDashboard();
+    };
+    reader.readAsText(file);
+    input.value = '';
+}
+
+function downloadTemplate() {
+    const csv = 'student_id,name,email,index\nSTU001,John Doe,john@email.com,1.0\nSTU002,Jane Smith,jane@email.com,1.0\n';
+    downloadFile(csv, 'students_template.csv', 'text/csv');
+}
+
+function exportStudents() {
+    const students = getStudents();
+    let csv = 'student_id,name,email,index\n';
+    students.forEach(s => {
+        csv += `${s.student_id},${s.name},${s.email || ''},${s.index}\n`;
+    });
+    downloadFile(csv, 'students_export.csv', 'text/csv');
+}
+
+function downloadFile(content, filename, type) {
+    const blob = new Blob([content], { type: type });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function clearAllData() {
+    if (!confirm('⚠️ This will delete ALL data (students, exams, bookings). Are you sure?')) return;
+    if (!confirm('Really sure? This cannot be undone!')) return;
+    
+    localStorage.removeItem('students');
+    localStorage.removeItem('exams');
+    localStorage.removeItem('bookings');
+    initializeData();
+    loadAdminDashboard();
+    alert('All data cleared. Sample students restored.');
+}
+
+function showAdminTab(tab) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    document.getElementById('adminExamsTab').classList.toggle('hidden', tab !== 'exams');
+    document.getElementById('adminStudentsTab').classList.toggle('hidden', tab !== 'students');
+}
+
+function showScreen(screenId) {
+    document.querySelectorAll('.login-screen, #studentDashboard, #adminDashboard').forEach(el => {
+        el.classList.add('hidden');
+    });
+    document.getElementById(screenId).classList.remove('hidden');
+}
+
+// Initialize
+initializeData();
+</script>
+
+</body>
+</html>
